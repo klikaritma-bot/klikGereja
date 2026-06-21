@@ -445,9 +445,12 @@
 
         window.onload = () => {
             const params = new URLSearchParams(window.location.search);
+            
+            // 1. Tangkap Parameter Affiliate
             if (params.get('ref')) localStorage.setItem('klik_ref', params.get('ref'));
             activeRefCode = localStorage.getItem('klik_ref');
 
+            // 2. Cek Sesi Login
             const savedSession = localStorage.getItem('klik_session');
             if(savedSession) currentUser = JSON.parse(savedSession);
 
@@ -455,7 +458,27 @@
                 renderUI();
                 document.getElementById('loader').style.display = 'none';
                 
-                if(activeRefCode) {
+                // 3. LOGIC DIRECT CHECKOUT DARI LANDING PAGE
+                const buyProductId = params.get('buy');
+                if (buyProductId) {
+                    cart = []; // Kosongkan keranjang lama
+                    const p = db.products.find(x => x.id === buyProductId);
+                    if (p) {
+                        cart.push({product: p, qty: 1}); // Masukkan produk otomatis
+                        updateCartUI();
+                        switchView('cart'); // Langsung buka halaman keranjang/kasir
+                        
+                        // Jika belum login, paksa buka modal pendaftaran/login
+                        if(!currentUser) {
+                            setTimeout(() => {
+                                Swal.fire({icon: 'info', title: 'Satu Langkah Lagi', text: 'Silakan buat akun atau login untuk melanjutkan pembayaran.'});
+                                openAuthModal();
+                            }, 500);
+                        }
+                    }
+                } 
+                // 4. Banner Replika Affiliate (Hanya tampil jika bukan mode auto-buy)
+                else if(activeRefCode) {
                     let affName = activeRefCode;
                     const affUser = db.users.find(u => u.affiliate_code === activeRefCode);
                     if(affUser && affUser.fullname) affName = affUser.fullname;
