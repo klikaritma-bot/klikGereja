@@ -842,6 +842,15 @@
                 </div>`;
                 renderAdminChart(myOrders);
             } else {
+                // LOGIKA AFILIASI UNTUK MEMBER BIASA
+                const commPercentage = parseInt(db.settings.affiliate_percentage) || 20;
+                
+                // Cari orderan orang lain yang menggunakan kode afiliasi user ini (hanya yang sudah Paid)
+                const myAffiliateOrders = db.orders.filter(o => o.affiliate_code === currentUser.affiliate_code && o.payment_status === 'Paid');
+                
+                // Hitung total komisi Rupiah
+                const totalCommission = myAffiliateOrders.reduce((sum, o) => sum + (o.total * (commPercentage / 100)), 0);
+
                 container.innerHTML = `
                 <div class="mb-10 flex justify-between items-center border-b border-navy-200 pb-6">
                     <div>
@@ -851,10 +860,10 @@
                     <button onclick="logout()" class="px-6 py-2.5 bg-white border border-red-200 text-red-600 rounded-xl font-bold shadow-sm">Keluar</button>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
-                    <div class="md:col-span-8">
+                    <div class="md:col-span-7">
                         <div class="bg-white rounded-2xl shadow-sm border border-navy-100 p-6">
                             <h2 class="text-xl font-bold text-navy-900 mb-2">Riwayat Transaksi</h2>
-<p class="text-sm text-navy-500 mb-6 font-medium"><span class="material-symbols-outlined text-sm align-middle text-primary-500">info</span> Link akses produk & instruksi penggunaan telah dikirimkan secara otomatis ke Email Anda.</p>
+                            <p class="text-sm text-navy-500 mb-6 font-medium"><span class="material-symbols-outlined text-sm align-middle text-primary-500">info</span> Link akses produk & instruksi penggunaan telah dikirimkan secara otomatis ke Email Anda.</p>
                             <div class="space-y-4">
                                 ${myOrders.length === 0 ? '<p class="text-navy-500 font-bold">Belum ada sistem aktif.</p>' : ''}
                                 ${myOrders.slice().reverse().map(o => `
@@ -868,20 +877,63 @@
                             </div>
                         </div>
                     </div>
-                    <div class="md:col-span-4">
+                    
+                    <div class="md:col-span-5 space-y-6">
+                        <!-- Kotak Info Link Afiliasi -->
                         <div class="bg-navy-900 rounded-2xl shadow-xl p-6 text-white">
                             <h2 class="text-xl font-bold mb-2">Afiliasi Partner</h2>
-                            <p class="text-navy-200 text-sm mb-6">Komisi <b>${db.settings.affiliate_percentage}%</b> per transaksi sukses.</p>
+                            <p class="text-navy-200 text-sm mb-6">Komisi <b>${commPercentage}%</b> per transaksi sukses.</p>
                             <div class="bg-navy-800 border border-navy-700 rounded-xl p-4 text-center mb-6">
                                 <span class="text-2xl font-black">${currentUser.affiliate_code || '-'}</span>
+                            </div>
                             <div class="space-y-3">
                                 <button onclick="navigator.clipboard.writeText('https://klikcrm.vercel.app/?ref=${currentUser.affiliate_code}'); Swal.fire('Tersalin!', 'Link Promo klikCRM berhasil disalin.', 'success');" class="w-full bg-primary-600 text-white py-3 rounded-xl font-bold shadow-md hover:bg-primary-700 transition">Salin Link klikCRM</button>
-                                
                                 <p class="text-xs text-navy-300 text-center mt-2 leading-tight">Sebarkan link di atas. Jika pembeli klik, komisi otomatis masuk ke akun Anda.</p>
                             </div>
+                        </div>
+
+                        <!-- Kotak Saldo Komisi & Riwayat Referal -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-navy-100 p-6">
+                            <h3 class="text-lg font-bold text-navy-900 mb-4">Dompet Komisi</h3>
+                            <div class="bg-green-50 rounded-xl p-4 border border-green-100 mb-6">
+                                <p class="text-green-600 font-bold text-xs uppercase mb-1">Total Tersedia (Rp)</p>
+                                <h4 class="text-3xl font-black text-green-700">${formatRp(totalCommission).replace('Rp ', '')}</h4>
+                            </div>
+                            
+                            <button onclick="requestPayout(${totalCommission})" class="w-full bg-white border-2 border-navy-900 text-navy-900 py-3 rounded-xl font-bold hover:bg-navy-900 hover:text-white transition mb-6 flex justify-center items-center gap-2">
+                                <span class="material-symbols-outlined text-lg">account_balance_wallet</span> Tarik Komisi
+                            </button>
+
+                            <h4 class="font-bold text-sm text-navy-900 mb-3 border-b border-navy-100 pb-2">Riwayat Closing Referal</h4>
+                            <div class="space-y-3 max-h-48 overflow-y-auto pr-2">
+                                ${myAffiliateOrders.length === 0 ? '<p class="text-xs text-navy-400 font-medium">Belum ada transaksi referal sukses.</p>' : ''}
+                                ${myAffiliateOrders.slice().reverse().map(o => `
+                                <div class="flex justify-between items-center bg-navy-50 p-3 rounded-lg border border-navy-100">
+                                    <div>
+                                        <div class="text-xs font-bold text-navy-900">${o.invoice}</div>
+                                        <div class="text-[10px] text-navy-500">${o.created_at ? o.created_at.substring(0, 10) : ''}</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-xs font-black text-green-600">+ ${formatRp(o.total * (commPercentage / 100))}</div>
+                                    </div>
+                                </div>`).join('')}
+                            </div>
+                        </div>
                     </div>
                 </div>`;
             }
+        }
+
+        // FUNGSI TARIK KOMISI VIA WA
+        function requestPayout(amount) {
+            if (amount <= 0) {
+                return Swal.fire('Oops!', 'Saldo komisi Anda masih Rp 0.', 'warning');
+            }
+            
+            const waAdmin = "6281328307335"; // GANTI DENGAN NOMOR WA ANDA
+            const text = `Halo Admin klikSistem, saya ingin mencairkan komisi afiliasi saya.%0A%0A*Nama:* ${currentUser.fullname}%0A*Kode Afiliasi:* ${currentUser.affiliate_code}%0A*Nominal:* ${formatRp(amount)}%0A%0AMohon panduannya untuk proses transfer. Terima kasih.`;
+            
+            window.open(`https://api.whatsapp.com/send?phone=${waAdmin}&text=${text}`, '_blank');
         }
 
         // ================= PRODUCT CMS (CRUD ADMIN) =================
