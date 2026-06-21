@@ -717,20 +717,65 @@
             if(!currentUser) return openAuthModal();
 
             const totalAmount = cart.reduce((sum, item) => sum + ((item.product.price - item.product.discount) * item.qty), 0);
+            
+            // 1. Tampilkan Pop-Up QRIS & Rekening Bank
             Swal.fire({
-                title: 'Checkout Simulasi',
-                text: 'Bayar via QRIS ' + formatRp(totalAmount),
-                showCancelButton: true, confirmButtonText: 'Bayar', confirmButtonColor: '#dc2626'
+                title: 'Selesaikan Pembayaran',
+                html: `
+                    <div class="text-left text-sm mb-4">Total Tagihan: <strong class="text-2xl text-primary-600 block mt-1">${formatRp(totalAmount)}</strong></div>
+                    <div class="bg-navy-50 p-5 rounded-2xl border border-navy-200 mb-4 text-center">
+                        <p class="font-bold text-navy-900 mb-3">Scan QRIS di bawah ini:</p>
+                        <!-- GANTI URL GAMBAR DI BAWAH INI DENGAN LINK GAMBAR QRIS ASLI ANDA -->
+                        <img src="https://placehold.co/200x200/ffffff/475569?text=QRIS+ANDA" alt="QRIS" class="w-48 h-48 mx-auto border-2 border-navy-200 rounded-xl shadow-sm mb-4">
+                        
+                        <div class="border-t border-navy-200 pt-3">
+                            <p class="text-xs text-navy-500 mb-1">Atau transfer manual ke:</p>
+                            <p class="font-black text-navy-900 text-lg">BCA 1234567890</p>
+                            <p class="text-sm font-bold text-navy-700">a.n. klikSistem (Yanita Pertiwi)</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-navy-600 font-medium bg-yellow-50 p-2 rounded">Setelah transfer, WAJIB klik tombol di bawah untuk konfirmasi.</p>
+                `,
+                showCancelButton: true, 
+                confirmButtonText: '<span class="material-symbols-outlined align-middle text-sm mr-1">whatsapp</span> Konfirmasi via WA', 
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#25D366', // Warna Hijau WA
+                cancelButtonColor: '#64748b'
             }).then(async (res) => {
                 if(res.isConfirmed) {
-                    Swal.fire({ title: 'Memproses...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-                    const orderData = { id: "ORD-"+Date.now().toString().slice(-4), invoice: "INV-"+Math.floor(Math.random()*10000), user_id: currentUser.id, affiliate_code: activeRefCode || "", total: totalAmount, payment_status: "Paid", status: "Completed", created_at: new Date().toISOString().split('T')[0] };
+                    Swal.fire({ title: 'Memproses Pesanan...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    
+                    const invoiceNum = "INV-"+Math.floor(Math.random()*10000);
+                    const waAdmin = "6281328307335"; // Nomor Admin Anda
+                    
+                    // 2. PERUBAHAN KRUSIAL: Set Status ke "Pending"
+                    const orderData = { 
+                        id: "ORD-"+Date.now().toString().slice(-4), 
+                        invoice: invoiceNum, 
+                        user_id: currentUser.id, 
+                        affiliate_code: activeRefCode || "", 
+                        total: totalAmount, 
+                        payment_status: "Pending", // <--- Sekarang Pending, bukan Paid
+                        status: "Waiting Payment", 
+                        created_at: new Date().toISOString().split('T')[0] 
+                    };
                     
                     try {
                         await apiCall('saveOrder', { orderData });
-                        db.orders.push(orderData); // Optimistic
-                        cart = []; updateCartUI();
-                        Swal.fire('Sukses', 'Sistem telah aktif di akun Anda.', 'success').then(() => switchView('dashboard'));
+                        db.orders.push(orderData); // Optimistic Update
+                        cart = []; 
+                        updateCartUI();
+                        
+                        // 3. Arahkan ke WA untuk kirim bukti transfer
+                        Swal.fire({
+                            title: 'Pesanan Dibuat!', 
+                            text: 'Sistem akan membuka WhatsApp. Silakan kirim foto bukti transfer Anda ke Admin.', 
+                            icon: 'success'
+                        }).then(() => {
+                            switchView('dashboard');
+                            const waText = `Halo Admin klikSistem, saya sudah mentransfer uang sebesar *${formatRp(totalAmount)}* untuk tagihan *${invoiceNum}*. Berikut saya lampirkan bukti transfernya.`;
+                            window.open(`https://api.whatsapp.com/send?phone=${waAdmin}&text=${waText}`, '_blank');
+                        });
                     } catch (err) {
                         Swal.fire('Error', err.message, 'error');
                     }
@@ -867,12 +912,17 @@
                             <div class="space-y-4">
                                 ${myOrders.length === 0 ? '<p class="text-navy-500 font-bold">Belum ada sistem aktif.</p>' : ''}
                                 ${myOrders.slice().reverse().map(o => `
-                                <div class="p-5 border border-navy-100 rounded-xl bg-white shadow-sm">
+                                <div class="p-5 border border-navy-100 rounded-xl bg-white shadow-sm mb-4">
                                     <div class="flex justify-between items-center mb-3">
                                         <span class="font-black text-navy-900 text-lg">${o.invoice}</span>
-                                        <div class="px-3 py-1 ${o.payment_status==='Paid'?'bg-green-100 text-green-700':'bg-yellow-100 text-yellow-700'} rounded-full font-bold text-xs">${o.payment_status}</div>
+                                        <div class="px-3 py-1 ${o.payment_status==='Paid'?'bg-green-100 text-green-700': o.payment_status==='Pending'?'bg-yellow-100 text-yellow-700':'bg-gray-100 text-gray-700'} rounded-full font-bold text-xs">${o.payment_status}</div>
                                     </div>
-                                    <div class="w-full h-1.5 bg-navy-100 rounded-full mt-4"><div class="h-full ${o.payment_status==='Paid'?'bg-primary-600 w-full':'bg-yellow-400 w-1/3'} rounded-full"></div></div>
+                                    <div class="w-full h-1.5 bg-navy-100 rounded-full mt-4 mb-4"><div class="h-full ${o.payment_status==='Paid'?'bg-primary-600 w-full': o.payment_status==='Pending'?'bg-yellow-400 w-1/3':'bg-gray-400 w-0'} rounded-full"></div></div>
+                                    
+                                    ${o.payment_status === 'Pending' ? `
+                                    <button onclick="window.open('https://api.whatsapp.com/send?phone=6281328307335&text=Halo Admin, ini bukti transfer saya untuk tagihan ${o.invoice}', '_blank')" class="w-full bg-white border border-green-500 text-green-600 font-bold py-2.5 rounded-xl hover:bg-green-50 text-sm flex justify-center items-center gap-2 transition">
+                                        <span class="material-symbols-outlined text-sm">whatsapp</span> Konfirmasi Pembayaran
+                                    </button>` : ''}
                                 </div>`).join('')}
                             </div>
                         </div>
