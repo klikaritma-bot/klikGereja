@@ -873,9 +873,11 @@
                             <p class="text-navy-200 text-sm mb-6">Komisi <b>${db.settings.affiliate_percentage}%</b> per transaksi sukses.</p>
                             <div class="bg-navy-800 border border-navy-700 rounded-xl p-4 text-center mb-6">
                                 <span class="text-2xl font-black">${currentUser.affiliate_code || '-'}</span>
+                            <div class="space-y-3">
+                                <button onclick="navigator.clipboard.writeText('https://klikcrm.vercel.app/?ref=${currentUser.affiliate_code}'); Swal.fire('Tersalin!', 'Link Promo klikCRM berhasil disalin.', 'success');" class="w-full bg-primary-600 text-white py-3 rounded-xl font-bold shadow-md hover:bg-primary-700 transition">Salin Link klikCRM</button>
+                                
+                                <p class="text-xs text-navy-300 text-center mt-2 leading-tight">Sebarkan link di atas. Jika pembeli klik, komisi otomatis masuk ke akun Anda.</p>
                             </div>
-                            <button onclick="navigator.clipboard.writeText('${window.location.href.split('?')[0]}?ref=${currentUser.affiliate_code}'); Swal.fire('Tersalin!', '', 'success');" class="w-full bg-primary-600 text-white py-3 rounded-xl font-bold">Salin Link Web</button>
-                        </div>
                     </div>
                 </div>`;
             }
