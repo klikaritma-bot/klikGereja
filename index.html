@@ -580,15 +580,6 @@
         }
 
         // ================= PRODUCT RENDERING =================
-        function renderCategories() {
-            const categories = [...new Set(db.products.map(p => p.category))];
-            let html = `<button onclick="filterProducts('')" class="whitespace-nowrap px-6 py-2.5 bg-primary-600 text-white font-bold text-sm rounded-full shadow-sm hover:bg-primary-700">Semua Modul</button>`;
-            categories.forEach(cat => {
-                html += `<button onclick="filterProducts('${cat}')" class="whitespace-nowrap px-6 py-2.5 bg-white text-navy-600 border border-navy-200 font-bold text-sm rounded-full hover:bg-navy-50">${cat}</button>`;
-            });
-            document.getElementById('category-filters').innerHTML = html;
-        }
-
         function renderProducts(filterCat = '') {
             const grid = document.getElementById('product-grid');
             const homeGrid = document.getElementById('home-products-grid');
@@ -611,8 +602,8 @@
                         <p class="text-sm text-navy-500 mb-6 line-clamp-2">${p.description}</p>
                         <div class="mt-auto pt-4 border-t border-navy-100 flex items-center justify-between">
                             <div class="flex flex-col"><span class="font-black text-lg text-primary-600">${formatRp(finalPrice)}</span></div>
-                            <button onclick="event.stopPropagation(); addToCart('${p.id}')" class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center hover:bg-primary-600 hover:text-white border border-primary-100 transition-all">
-                                <span class="material-symbols-outlined">add_shopping_cart</span>
+                            <button onclick="event.stopPropagation(); viewProduct('${p.id}')" class="px-4 py-2 rounded-xl bg-primary-50 text-primary-600 font-bold flex items-center justify-center hover:bg-primary-600 hover:text-white border border-primary-100 transition-all text-sm">
+                                Lihat Detail <span class="material-symbols-outlined text-sm ml-1">arrow_forward</span>
                             </button>
                         </div>
                     </div>
@@ -645,7 +636,7 @@
                         <p class="text-sm text-navy-500 mb-6 line-clamp-2">${p.description}</p>
                         <div class="mt-auto pt-4 border-t border-navy-100 flex items-center justify-between">
                             <div><span class="font-black text-lg text-primary-600">${formatRp(finalPrice)}</span></div>
-                            <button onclick="event.stopPropagation(); addToCart('${p.id}')" class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center hover:bg-primary-600 hover:text-white transition-all"><span class="material-symbols-outlined">add</span></button>
+                            <button onclick="event.stopPropagation(); viewProduct('${p.id}')" class="px-4 py-2 rounded-xl bg-primary-50 text-primary-600 font-bold flex items-center justify-center hover:bg-primary-600 hover:text-white border border-primary-100 transition-all text-sm">Lihat Detail <span class="material-symbols-outlined text-sm ml-1">arrow_forward</span></button>
                         </div>
                     </div>
                 </div>`;
@@ -654,28 +645,15 @@
         }
 
         function viewProduct(id) {
-            const p = db.products.find(x => x.id === id);
-            if(!p || p.status !== 'Active') return;
-            const finalPrice = p.price - (p.discount || 0);
-            
-            document.getElementById('product-detail-container').innerHTML = `
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <div><img src="${p.image}" class="w-full rounded-2xl border border-navy-200 shadow-sm" onerror="this.src='https://placehold.co/500x300/e2e8f0/475569?text=Gambar+Produk'"></div>
-                <div class="flex flex-col justify-center">
-                    <span class="w-fit bg-navy-900 text-white text-xs font-bold px-4 py-2 rounded-lg mb-4 shadow">${p.category}</span>
-                    <h1 class="text-3xl md:text-4xl font-extrabold text-navy-900 mb-4">${p.name}</h1>
-                    <p class="text-navy-600 text-lg mb-8 leading-relaxed">${p.description}</p>
-                    <div class="mb-8 p-6 bg-white rounded-2xl border border-navy-200 shadow-sm">
-                        <p class="text-4xl font-black text-primary-600">${formatRp(finalPrice)}</p>
-                    </div>
-                    <button onclick="addToCart('${p.id}')" class="w-full bg-primary-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-primary-700 transition-all shadow-xl shadow-primary-600/20 flex items-center justify-center gap-2">
-                        <span class="material-symbols-outlined">add_shopping_cart</span> Masukkan Keranjang
-                    </button>
-                </div>
-            </div>`;
-            switchView('product-detail');
+            // ROUTER: Arahkan langsung ke Landing Page masing-masing produk
+            if(id === 'PRD-01' || id === 'PRD-02') {
+                window.location.href = "https://klikcrm.vercel.app";
+            } else if (id === 'PRD-03') {
+                window.location.href = "https://klikgereja.vercel.app"; 
+            } else {
+                Swal.fire('Segera Hadir', 'Halaman detail untuk sistem ini sedang dipersiapkan.', 'info');
+            }
         }
-
         // ================= CART & CHECKOUT =================
         function addToCart(id) {
             const p = db.products.find(x => x.id === id);
