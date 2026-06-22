@@ -875,7 +875,7 @@
                 renderAdminChart(myOrders);
             } else {
                 // LOGIKA AFILIASI UNTUK MEMBER BIASA
-                const commPercentage = parseInt(db.settings.affiliate_percentage) || 20;
+                const commPercentage = parseInt(db.settings.affiliate_percentage) || 40;
                 
                 // Cari orderan orang lain yang menggunakan kode afiliasi user ini (hanya yang sudah Paid)
                 const myAffiliateOrders = db.orders.filter(o => o.affiliate_code === currentUser.affiliate_code && o.payment_status === 'Paid');
