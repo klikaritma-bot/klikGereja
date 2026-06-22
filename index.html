@@ -580,6 +580,15 @@
         }
 
         // ================= PRODUCT RENDERING =================
+        function renderCategories() {
+            const categories = [...new Set(db.products.map(p => p.category))];
+            let html = `<button onclick="filterProducts('')" class="whitespace-nowrap px-6 py-2.5 bg-primary-600 text-white font-bold text-sm rounded-full shadow-sm hover:bg-primary-700">Semua Modul</button>`;
+            categories.forEach(cat => {
+                html += `<button onclick="filterProducts('${cat}')" class="whitespace-nowrap px-6 py-2.5 bg-white text-navy-600 border border-navy-200 font-bold text-sm rounded-full hover:bg-navy-50">${cat}</button>`;
+            });
+            document.getElementById('category-filters').innerHTML = html;
+        }
+
         function renderProducts(filterCat = '') {
             const grid = document.getElementById('product-grid');
             const homeGrid = document.getElementById('home-products-grid');
