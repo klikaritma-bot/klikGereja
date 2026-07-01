@@ -722,9 +722,9 @@
                             <img src="https://i.ibb.co.com/XfXyKvT1/QRIS-klik-Sistem.png" alt="QRIS" class="w-48 h-48 mx-auto border-2 border-navy-200 rounded-xl shadow-sm mb-3 object-contain bg-white">
                             
                             <!-- PASTIKAN MENGGANTI URL href DI BAWAH INI SAMA DENGAN URL GAMBAR QRIS DI ATAS -->
-                            <a href="https://i.ibb.co.com/XfXyKvT1/QRIS-klik-Sistem.png" download="QRIS-klikSistem.jpg" target="_blank" class="inline-flex items-center justify-center gap-1 bg-white border border-navy-300 text-navy-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-navy-100 transition shadow-sm">
-                                <span class="material-symbols-outlined text-[16px]">download</span> Simpan Gambar QRIS
-                            </a>
+                            <button type="button" onclick="unduhQRIS('https://i.ibb.co.com/XfXyKvT1/QRIS-klik-Sistem.png')" class="inline-flex items-center justify-center gap-1 bg-white border border-navy-300 text-navy-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-navy-100 transition shadow-sm w-full mt-2">
+    <span class="material-symbols-outlined text-[16px]">download</span> Simpan Gambar QRIS
+</button>
                         </div>
                         
                         <div class="border-t border-navy-200 pt-4">
@@ -1244,6 +1244,32 @@
 
         function DUMMY_DB() { return { products: [{ id: "PRD-01", name: "klikCRM Pro", category: "App", price: 1500000, discount: 0, image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=500", description: "Mesin Akselerasi Konversi Sales.", status: "Active" }], users: [{ id: "USR-1", fullname: "Admin", email: "admin@kliksistem.com", password_hash: "sysadmin", role: "Admin" }], orders: [], settings: { affiliate_percentage: 20 } }; }
 
+        async function unduhQRIS(url) {
+            try {
+                Swal.fire({title: 'Menyiapkan Gambar...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+
+                const response = await fetch(url);
+                const blob = await response.blob();
+                const urlCreator = window.URL || window.webkitURL;
+                const imageUrl = urlCreator.createObjectURL(blob);
+
+                const tag = document.createElement('a');
+                tag.href = imageUrl;
+                tag.download = 'QRIS-klikSistem.jpg';
+                document.body.appendChild(tag);
+                tag.click();
+                document.body.removeChild(tag);
+
+                Swal.close();
+            } catch (err) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Info Pengunduhan',
+                    text: 'Karena pengaturan keamanan browser, silakan tekan tahan gambar QRIS di atas lalu pilih "Simpan Gambar" (Save Image).',
+                    confirmButtonText: 'Tutup'
+                });
+            }
+        }
     </script>
 </body>
 </html>
