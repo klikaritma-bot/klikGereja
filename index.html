@@ -824,6 +824,14 @@
                     closeAuthModal(); renderNavAuth();
                     Swal.fire({icon:'success', title:'Selamat Datang', toast:true, position:'top-end', showConfirmButton:false, timer:2000});
                     switchView('dashboard');
+                    
+                    // --- TAMBAHAN CCTV TITIK B ---
+                    // Cek apakah pelanggan ini login karena mau bayar dari Landing Page
+                    if (typeof checkPendingPurchase === "function") {
+                        checkPendingPurchase(); 
+                    }
+                    // -----------------------------
+                }
                 } else if (res.success && !res.user) {
                     Swal.fire('Berhasil', res.message, 'success'); setAuthTab('login');
                 } else {
@@ -1277,7 +1285,56 @@
             });
         }
     } //
-        
+
+// --- LOGIKA AUTO-TRIGGER CHECKOUT ---
+        function checkPendingPurchase() {
+            // 1. Cek apakah ada parameter ?buy= di URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const buyProductId = urlParams.get('buy');
+            
+            // 2. Cek apakah ada niat beli yang tertunda di LocalStorage (sebelum login)
+            const pendingBuyId = localStorage.getItem('pending_kliksistem_buy');
+            
+            // Tentukan ID mana yang akan dieksekusi (URL prioritas utama)
+            const targetProductId = buyProductId || pendingBuyId;
+
+            if (targetProductId) {
+                // Jika user SUDAH LOGIN
+                if (currentUser) {
+                    // Cari data produk di database
+                    const product = dummy_db().products.find(p => p.id === targetProductId);
+                    
+                    if (product) {
+                        // Masukkan produk ke keranjang (bersihkan yang lama agar fokus)
+                        cart = [{ product: product, qty: 1 }];
+                        updateCart(); // Update tampilan keranjang (sesuaikan dengan nama fungsi Anda)
+                        
+                        // Buka Pop-Up Pembayaran secara otomatis dengan jeda 0.5 detik agar smooth
+                        setTimeout(() => {
+                            processCheckout();
+                            
+                            // Bersihkan jejak agar tidak muncul terus saat halaman di-refresh
+                            localStorage.removeItem('pending_kliksistem_buy');
+                            window.history.replaceState({}, document.title, window.location.pathname);
+                        }, 500); 
+                    }
+                } else {
+                    // Jika user BELUM LOGIN, simpan niat belinya lalu paksa buka modal login
+                    localStorage.setItem('pending_kliksistem_buy', targetProductId);
+                    openAuthModal(); // Membuka pop-up login (sesuaikan dengan nama fungsi Anda)
+                    
+                    // Bersihkan URL agar bersih
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            }
+        }
+
+  // CCTV Titik A: Berjalan otomatis saat halaman web selesai dimuat
+    window.addEventListener('DOMContentLoaded', () => {
+        if (typeof checkPendingPurchase === "function") {
+            checkPendingPurchase();
+        }
+    });      
     </script>
 </body>
 </html>
