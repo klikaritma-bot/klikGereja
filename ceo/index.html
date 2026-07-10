@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KlikCEO - Platform Operasional Bisnis</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], },
+                    colors: { primary: '#0a192f', brand: '#F5A623', secondary: '#1e88e5' }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #0a192f 0%, #112240 100%); }
+        .glass-panel { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .abstract-shadow { box-shadow: 0 20px 40px -10px rgba(10, 25, 47, 0.1); }
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+    </style>
+</head>
+<body class="font-sans text-gray-800 antialiased bg-slate-50 relative">
+
+    <!-- NAVBAR -->
+    <nav class="fixed w-full z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex-shrink-0 flex items-center gap-2">
+                    <i class="bi bi-rocket-takeoff-fill text-brand text-3xl"></i>
+                    <span class="font-bold text-2xl text-primary tracking-tight">KlikCEO <span class="font-light text-gray-500">OS</span></span>
+                </div>
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="#fitur" class="text-gray-600 hover:text-primary font-medium transition">Fitur Utama</a>
+                    <a href="#harga" class="text-gray-600 hover:text-primary font-medium transition">Harga</a>
+                    <a href="#faq" class="text-gray-600 hover:text-primary font-medium transition">FAQ</a>
+                    <button type="button" onclick="checkoutLangsung()" class="bg-brand text-white px-6 py-2.5 rounded-full font-bold hover:brightness-110 transition shadow-lg shadow-orange-500/30">Ambil Promo</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="pt-32 pb-20 md:pt-40 md:pb-28 gradient-bg overflow-hidden relative">
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+            <div class="absolute -top-24 -right-24 w-96 h-96 bg-secondary opacity-20 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 left-10 w-72 h-72 bg-brand opacity-10 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="text-center lg:text-left">
+                    <div class="inline-block bg-brand/20 text-brand px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide mb-6 border border-brand/30">
+                        <i class="bi bi-lightning-charge-fill me-1"></i> Digital Transformation Partner
+                    </div>
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
+                        Kendalikan Seluruh Bisnis Anda Dari <span class="text-brand">Satu Tempat.</span>
+                    </h1>
+                    <p class="text-lg text-gray-300 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                        Tinggalkan aplikasi yang terpisah-pisah. Satu platform terpusat untuk mengelola <strong>Big 3 Tasks</strong> harian, proyek klien, hingga brankas SOP Anda.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <button type="button" onclick="checkoutLangsung()" class="bg-brand text-white px-8 py-4 rounded-full font-bold text-lg hover:brightness-110 transition shadow-xl shadow-orange-500/30 text-center">
+                            Promo Rp249rb/Tahun!
+                        </button>
+                        <a href="#fitur" class="bg-white/10 text-white border border-white/20 px-8 py-4 rounded-full font-bold text-lg hover:bg-white/20 transition text-center flex items-center justify-center gap-2">
+                            Lihat Fiturnya <i class="bi bi-arrow-down"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="relative mt-10 lg:mt-0 flex justify-center lg:justify-end">
+                    <div class="glass-panel w-full max-w-md rounded-3xl p-6 shadow-2xl transform rotate-2 hover:rotate-0 transition duration-500">
+                        <div class="flex justify-between items-center mb-6">
+                            <div>
+                                <h3 class="text-white/60 text-sm font-bold uppercase tracking-wider">BIG 3 TODAY</h3>
+                                <h2 class="text-xl font-bold text-white mt-1">Fokus Harian Anda</h2>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-brand/20 flex items-center justify-center text-brand">
+                                <i class="bi bi-crosshair text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="bg-white/10 p-4 rounded-xl flex justify-between items-center border border-white/5">
+                                <div>
+                                    <div class="text-white font-bold text-sm">Finalisasi Pitch Deck</div>
+                                    <div class="text-white/50 text-xs mt-1"><i class="bi bi-tag"></i> Area: Sales</div>
+                                </div>
+                                <span class="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-xs font-bold border border-blue-500/30">Todo</span>
+                            </div>
+                            <div class="bg-white/10 p-4 rounded-xl flex justify-between items-center border border-white/5 opacity-50">
+                                <div>
+                                    <div class="text-white font-bold text-sm line-through">Review Laporan Bulanan</div>
+                                    <div class="text-white/50 text-xs mt-1"><i class="bi bi-check2-circle text-green-400"></i> Diselesaikan pagi ini</div>
+                                </div>
+                                <span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-bold border border-green-500/30">Done</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FITUR SECTION -->
+    <section id="fitur" class="py-24 bg-white overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-32">
+            
+            <div class="flex flex-col md:flex-row items-center gap-12">
+                <div class="w-full md:w-1/2">
+                    <div class="inline-block px-4 py-1.5 bg-blue-50 text-secondary font-bold rounded-full text-sm mb-4 border border-blue-100">Modul Operasional</div>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-primary mb-4 leading-tight">Kanban Task Engine</h2>
+                    <h4 class="text-xl font-semibold text-gray-700 mb-6">Fokus pada "Big 3" Anda.</h4>
+                    <p class="text-gray-600 text-lg leading-relaxed">Setiap jam 7 pagi, sistem akan mengirimi Anda email berisi 3 Tugas Teratas yang harus diselesaikan hari itu berdasarkan Prioritas dan Dampak Pendapatan. Kelola pekerjaan dengan metode Drag & Drop tanpa stres.</p>
+                </div>
+                <div class="w-full md:w-1/2">
+                    <img src="https://images.unsplash.com/photo-1540350394557-8d14678e7f91?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Kanban" class="rounded-3xl shadow-2xl border border-gray-200 transform rotate-2 hover:rotate-0 transition duration-500 w-full object-cover h-80">
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row-reverse items-center gap-12">
+                <div class="w-full md:w-1/2">
+                    <div class="inline-block px-4 py-1.5 bg-green-50 text-green-600 font-bold rounded-full text-sm mb-4 border border-green-100">Modul Penjualan</div>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-primary mb-4 leading-tight">CRM & Visual Pipeline</h2>
+                    <h4 class="text-xl font-semibold text-gray-700 mb-6">Lacak Nilai Potensi Klien Anda.</h4>
+                    <p class="text-gray-600 text-lg leading-relaxed">Dari 'Lead' pertama hingga 'Deal'. Pantau tahapan negosiasi dan total potensi pendapatan Anda secara real-time. Jangan biarkan ada prospek yang lolos dari radar follow-up Anda.</p>
+                </div>
+                <div class="w-full md:w-1/2">
+                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="CRM Pipeline" class="rounded-3xl shadow-2xl border border-gray-200 transform -rotate-2 hover:rotate-0 transition duration-500 w-full object-cover h-80">
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row items-center gap-12">
+                <div class="w-full md:w-1/2">
+                    <div class="inline-block px-4 py-1.5 bg-purple-50 text-purple-600 font-bold rounded-full text-sm mb-4 border border-purple-100">Modul Aset Digital</div>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-primary mb-4 leading-tight">Knowledge Hub (SOP)</h2>
+                    <h4 class="text-xl font-semibold text-gray-700 mb-6">Pusat Otak Bisnis Anda.</h4>
+                    <p class="text-gray-600 text-lg leading-relaxed">Simpan semua SOP, Prompt AI andalan, Template Dokumen, dan Catatan Penting. Dilengkapi dengan Rich-Text Editor terintegrasi untuk mendokumentasikan sistem bisnis Anda dengan rapi.</p>
+                </div>
+                <div class="w-full md:w-1/2">
+                    <img src="https://images.unsplash.com/photo-1456324504439-367cee3b3c32?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Knowledge Hub" class="rounded-3xl shadow-2xl border border-gray-200 transform rotate-2 hover:rotate-0 transition duration-500 w-full object-cover h-80">
+                </div>
+            </div>
+            
+            <div class="flex flex-col md:flex-row-reverse items-center gap-12">
+                <div class="w-full md:w-1/2">
+                    <div class="inline-block px-4 py-1.5 bg-orange-50 text-brand font-bold rounded-full text-sm mb-4 border border-orange-100">Modul Eksekutif</div>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-primary mb-4 leading-tight">Command Center</h2>
+                    <h4 class="text-xl font-semibold text-gray-700 mb-6">Helicopter View Bisnis Anda.</h4>
+                    <p class="text-gray-600 text-lg leading-relaxed">Kendalikan semuanya dari satu layar. Pantau metrik kunci seperti Pipeline Revenue, Active Projects, dan Distribusi Status Klien melalui grafik interaktif yang otomatis diperbarui.</p>
+                </div>
+                <div class="w-full md:w-1/2">
+                    <img src="https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Dashboard" class="rounded-3xl shadow-2xl border border-gray-200 transform -rotate-2 hover:rotate-0 transition duration-500 w-full object-cover h-80">
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- HARGA TUNGGAL SECTION -->
+    <section id="harga" class="py-24 bg-slate-50 border-t border-gray-100 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-primary mb-4">Penawaran Tak Terbantahkan</h2>
+                <p class="text-xl text-gray-600">Investasi kecil untuk menyelamatkan ratusan juta potensi closing dan waktu Anda.</p>
+            </div>
+
+            <div class="max-w-md mx-auto bg-primary rounded-3xl p-8 shadow-2xl relative border-4 border-brand flex flex-col z-10">
+                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                    <span class="bg-brand text-white font-bold px-6 py-2 rounded-full text-xs md:text-sm uppercase tracking-wider shadow-lg">
+                        ⭐ Promo Spesial Terbatas
+                    </span>
+                </div>
+                <div class="mb-6 mt-6 text-center">
+                    <h3 class="text-2xl font-bold text-white">Lisensi Akses Penuh</h3>
+                    <p class="text-gray-400 mt-2">Tanpa biaya langganan server bulanan</p>
+                </div>
+                <div class="mb-6 pb-6 border-b border-gray-700 text-center">
+                    <div class="text-gray-400 line-through text-xl mb-1">Rp 499.000</div>
+                    <div class="flex justify-center items-end gap-1">
+                        <span class="text-5xl font-extrabold text-brand">Rp 249.000</span>
+                    </div>
+                </div>
+                <ul class="space-y-4 mb-8 flex-1 text-gray-300">
+                    <li class="flex items-start"><i class="bi bi-check-circle-fill text-brand mt-1 mr-3"></i> <span>Akses penuh Command Center</span></li>
+                    <li class="flex items-start"><i class="bi bi-check-circle-fill text-brand mt-1 mr-3"></i> <span>Visual Kanban & CRM Pipeline</span></li>
+                    <li class="flex items-start"><i class="bi bi-check-circle-fill text-brand mt-1 mr-3"></i> <span>Modul Project Management</span></li>
+                    <li class="flex items-start"><i class="bi bi-check-circle-fill text-brand mt-1 mr-3"></i> <span>Export Data Backup (JSON & CSV)</span></li>
+                    <li class="flex items-start bg-white/10 p-4 rounded-xl border border-brand/30 mt-4"><i class="bi bi-star-fill text-brand mt-1 mr-3"></i> <span class="text-white font-bold">Harga flat, bayar sekali pakai sepuasnya!</span></li>
+                </ul>
+                <button type="button" onclick="checkoutLangsung()" class="w-full text-center bg-brand text-white font-extrabold text-lg py-4 rounded-xl hover:brightness-110 transition shadow-lg shadow-orange-500/30">
+                    Ambil Promo Sekarang
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ SECTION -->
+    <section id="faq" class="py-20 bg-white border-t border-gray-100">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-primary mb-4">Pertanyaan yang Sering Diajukan</h2>
+            </div>
+            <div class="space-y-4">
+                <details class="group bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden cursor-pointer">
+                    <summary class="flex justify-between items-center font-bold p-6 text-primary select-none text-lg">
+                        Apakah data operasional saya aman?
+                        <span class="transition group-open:rotate-180 text-brand"><i class="bi bi-chevron-down"></i></span>
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-600 border-t border-gray-100 pt-4 leading-relaxed">
+                        Sangat aman. KlikCEO menggunakan arsitektur <i>Isolated Workspace</i>. Data Anda tidak akan pernah bercampur dengan pengguna lain. Selain itu, Anda bisa mengekspor (Backup) data Anda ke Excel atau JSON kapan saja.
+                    </div>
+                </details>
+                <details class="group bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden cursor-pointer">
+                    <summary class="flex justify-between items-center font-bold p-6 text-primary select-none text-lg">
+                        Saya gaptek, apakah sistem ini sulit digunakan?
+                        <span class="transition group-open:rotate-180 text-brand"><i class="bi bi-chevron-down"></i></span>
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-600 border-t border-gray-100 pt-4 leading-relaxed">
+                        Tentu tidak! Antarmuka didesain sangat modern dan responsif. Pengalaman penggunanya sama mudahnya dengan menggunakan aplikasi di HP Anda. Cukup login, klik, dan geser (drag & drop) kartu tugas Anda.
+                    </div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-[#0f172a] text-white pt-16 pb-8 border-t border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+                <div>
+                    <div class="flex items-center gap-2 mb-6">
+                        <i class="bi bi-rocket-takeoff-fill text-brand text-3xl"></i>
+                        <span class="font-bold text-3xl tracking-tight">KlikCEO</span>
+                    </div>
+                    <div class="space-y-4 text-gray-400">
+                        <p class="flex items-start gap-3"><i class="bi bi-geo-alt-fill text-secondary mt-1"></i> <span>Surakarta, Jawa Tengah,<br>Indonesia</span></p>
+                        <p class="flex items-center gap-3"><i class="bi bi-whatsapp text-[#25D366]"></i> <a href="https://wa.me/6281328307335" target="_blank" class="hover:text-white transition">0813-2830-7335</a></p>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-xl mb-6 text-white">Ikuti Kami</h4>
+                    <div class="flex space-x-4">
+                        <a href="https://wa.me/6281328307335" target="_blank" class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-xl hover:bg-[#25D366] hover:text-white transition hover:-translate-y-1"><i class="bi bi-whatsapp"></i></a>
+                        <a href="#" class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-xl hover:bg-[#E1306C] hover:text-white transition hover:-translate-y-1"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-xl hover:bg-[#1877F2] hover:text-white transition hover:-translate-y-1"><i class="bi bi-facebook"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-xl mb-6 text-white">Ekosistem Kami</h4>
+                    <ul class="space-y-3">
+                        <li><a href="https://kliksistem.com" target="_blank" class="text-gray-400 hover:text-brand transition flex items-center gap-2"><i class="bi bi-arrow-right-short text-secondary"></i> klikSistem ERP</a></li>
+                        <li><a href="https://klikcrm.vercel.app" target="_blank" class="text-gray-400 hover:text-brand transition flex items-center gap-2"><i class="bi bi-arrow-right-short text-secondary"></i> klikCRM</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-gray-500 text-sm mb-0">&copy; 2026 klikSistem. All rights reserved.</p>
+                <p class="text-gray-500 text-sm mb-0">Develop by <a href="https://kliksistem.com" target="_blank" class="text-brand hover:text-white transition font-bold">klikSistem.com</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPT UTAMA (TERINTEGRASI DENGAN WEB PUSAT) -->
+    <script>
+        let currentRef = '';
+        
+        document.addEventListener("DOMContentLoaded", function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            currentRef = urlParams.get('ref');
+            
+            if (!currentRef) { 
+                currentRef = localStorage.getItem('klikceo_affiliate_ref') || ''; 
+            } else { 
+                localStorage.setItem('klikceo_affiliate_ref', currentRef); 
+            }
+        });
+
+        // FUNGSI ROUTING: Direct to Checkout Kasir Pusat
+        function checkoutLangsung() {
+            // Asumsi PRD-04 adalah ID Produk klikCEO di database web pusat
+            let productId = 'PRD-04'; 
+
+            const refParam = currentRef ? `&ref=${currentRef}` : '';
+            const checkoutUrl = `https://kliksistem.vercel.app/?buy=${productId}${refParam}`;
+            
+            window.location.href = checkoutUrl;
+        }
+    </script>
+</body>
+</html>
