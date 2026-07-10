@@ -87,8 +87,7 @@
 
         <!-- =================== VIEW: HOME =================== -->
         <section id="view-home" class="view-section active flex-grow">
-            
-            <!-- 1. HERO SECTION -->
+            <!-- (Sama dengan sebelumnya, Hero Section, 3 Risiko, dll) -->
             <div class="bg-navy-900 overflow-hidden relative border-b border-navy-800 pt-16 pb-24 lg:pt-28 lg:pb-32">
                 <div class="absolute inset-0 opacity-5" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 30px 30px;"></div>
                 <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
@@ -313,7 +312,6 @@
     </footer>
 
     <!-- Mobile Nav -->
-    <!-- Mobile Nav -->
     <nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 h-[72px] pb-[env(safe-area-inset-bottom)] md:hidden bg-white border-t border-navy-200 z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
         <a onclick="switchView('home')" class="flex flex-col items-center justify-center text-navy-500"><span class="material-symbols-outlined">home</span></a>
         <a onclick="switchView('products')" class="flex flex-col items-center justify-center text-navy-500"><span class="material-symbols-outlined">storefront</span></a>
@@ -394,7 +392,7 @@
         </div>
     </div>
 
-    <!-- Web Replika Banner (PERBAIKAN WARNA) -->
+    <!-- Web Replika Banner -->
     <div id="replika-banner" class="fixed bottom-16 md:bottom-0 left-0 w-full bg-navy-900 border-t-4 border-yellow-500 text-white p-4 z-50 shadow-[0_-10px_20px_rgba(0,0,0,0.3)] flex justify-center items-center gap-3">
         <div class="bg-yellow-500/20 p-2 rounded-full hidden sm:block">
             <span class="material-symbols-outlined text-yellow-500">stars</span>
@@ -404,11 +402,9 @@
     </div>
 
     <!-- ==============================================
-         JAVASCRIPT LOGIC (REST API + FETCH)
+         JAVASCRIPT LOGIC
          ============================================== -->
     <script>
-        // URL WEB APP GOOGLE APPS SCRIPT ANDA (REST API)
-        // WAJIB DIISI JIKA INGIN DEPLOY DI VERCEL/CPANEL
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwnhONUFvRwr24kU3ZyEBTCJ879k2z8jsrRrzp_4xOa8TIIwxXpwFOlHIrX0Ya67Eco/exec'; 
 
         let db = { products: [], users: [], orders: [], settings: {} };
@@ -419,21 +415,17 @@
 
         const formatRp = (angka) => "Rp " + new Intl.NumberFormat('id-ID').format(angka);
 
-        // FUNGSI KOMUNIKASI API ASYNC/AWAIT
         async function apiCall(action, payload = {}) {
             if (!SCRIPT_URL) {
-                await new Promise(r => setTimeout(r, 800)); // Simulasi Delay
+                await new Promise(r => setTimeout(r, 800)); 
                 return handleDummyAPI(action, payload);
             }
-
             try {
                 if (action === 'getAllData') {
                     const res = await fetch(`${SCRIPT_URL}?action=getAllData`);
                     if (!res.ok) throw new Error("HTTP Status " + res.status);
                     return await res.json();
                 }
-
-                // Kirim request ke doPost sebagai plain text JSON string
                 const res = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     body: JSON.stringify({ action, ...payload })
@@ -447,11 +439,9 @@
         window.onload = () => {
             const params = new URLSearchParams(window.location.search);
             
-            // 1. Tangkap Parameter Affiliate
             if (params.get('ref')) localStorage.setItem('klik_ref', params.get('ref'));
             activeRefCode = localStorage.getItem('klik_ref');
 
-            // 2. Cek Sesi Login
             const savedSession = localStorage.getItem('klik_session');
             if(savedSession) currentUser = JSON.parse(savedSession);
 
@@ -459,27 +449,11 @@
                 renderUI();
                 document.getElementById('loader').style.display = 'none';
                 
-                // 3. LOGIC DIRECT CHECKOUT DARI LANDING PAGE
-                const buyProductId = params.get('buy');
-                if (buyProductId) {
-                    cart = []; // Kosongkan keranjang lama
-                    const p = db.products.find(x => x.id === buyProductId);
-                    if (p) {
-                        cart.push({product: p, qty: 1}); // Masukkan produk otomatis
-                        updateCartUI();
-                        switchView('cart'); // Langsung buka halaman keranjang/kasir
-                        
-                        // Jika belum login, paksa buka modal pendaftaran/login
-                        if(!currentUser) {
-                            setTimeout(() => {
-                                Swal.fire({icon: 'info', title: 'Satu Langkah Lagi', text: 'Silakan buat akun atau login untuk melanjutkan pembayaran.'});
-                                openAuthModal();
-                            }, 500);
-                        }
-                    }
-                } 
-                // 4. Banner Replika Affiliate (Hanya tampil jika bukan mode auto-buy)
-                else if(activeRefCode) {
+                // Memicu Auto-Trigger Checkout
+                checkPendingPurchase();
+
+                // Banner Replika (Hanya tampil jika tidak ada proses beli tertunda)
+                if(activeRefCode && !localStorage.getItem('pending_kliksistem_buy')) {
                     let affName = activeRefCode;
                     const affUser = db.users.find(u => u.affiliate_code === activeRefCode);
                     if(affUser && affUser.fullname) affName = affUser.fullname;
@@ -523,57 +497,39 @@
             }
         }
 
-        // FUNGSI DEMO REPLIKA
         function demoReplika() {
             Swal.fire({
-                icon: 'info',
-                title: 'Simulasi Sistem Afiliasi',
-                text: 'Jika ada calon klien yang mengklik link unik Anda, nama Anda akan terus menempel di layar mereka sebagai pendamping eksklusif (membangun Trust).',
-                confirmButtonText: 'Tampilkan Demo Banner',
-                confirmButtonColor: '#0f172a'
+                icon: 'info', title: 'Simulasi Sistem Afiliasi', text: 'Jika ada calon klien yang mengklik link unik Anda, nama Anda akan terus menempel di layar mereka sebagai pendamping eksklusif (membangun Trust).', confirmButtonText: 'Tampilkan Demo Banner', confirmButtonColor: '#0f172a'
             }).then((res) => {
                 if(res.isConfirmed) {
                     document.getElementById('replika-name').innerText = "Budi (Demo Agen)";
                     const banner = document.getElementById('replika-banner');
                     banner.classList.add('show');
-                    
-                    setTimeout(() => {
-                        banner.classList.remove('show');
-                    }, 5000); // Hilang setelah 5 detik
+                    setTimeout(() => { banner.classList.remove('show'); }, 5000); 
                 }
             });
         }
 
-        // FUNGSI MODAL KONSULTASI
         function openConsultationModal() {
-            document.getElementById('consultation-modal').classList.remove('hidden');
-            document.getElementById('consultation-modal').classList.add('flex');
+            document.getElementById('consultation-modal').classList.remove('hidden'); document.getElementById('consultation-modal').classList.add('flex');
         }
         function closeConsultationModal() {
-            document.getElementById('consultation-modal').classList.add('hidden');
-            document.getElementById('consultation-modal').classList.remove('flex');
+            document.getElementById('consultation-modal').classList.add('hidden'); document.getElementById('consultation-modal').classList.remove('flex');
         }
 
         async function submitConsultation(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
-            const ogText = btn.innerHTML;
-            btn.innerHTML = "Memproses..."; btn.disabled = true;
+            const ogText = btn.innerHTML; btn.innerHTML = "Memproses..."; btn.disabled = true;
 
             const consultationData = {
-                id: "CST-" + Date.now(),
-                name: document.getElementById('cons-name').value,
-                contact: document.getElementById('cons-contact').value,
-                business: document.getElementById('cons-business').value,
-                message: document.getElementById('cons-message').value,
-                created_at: new Date().toISOString().split('T')[0]
+                id: "CST-" + Date.now(), name: document.getElementById('cons-name').value, contact: document.getElementById('cons-contact').value, business: document.getElementById('cons-business').value, message: document.getElementById('cons-message').value, created_at: new Date().toISOString().split('T')[0]
             };
 
             try {
                 await apiCall('saveConsultation', { consultationData });
                 Swal.fire('Terkirim!', 'Tim analis kami akan segera menghubungi Anda.', 'success');
-                closeConsultationModal();
-                e.target.reset();
+                closeConsultationModal(); e.target.reset();
             } catch (err) {
                 Swal.fire('Error', err.message, 'error');
             }
@@ -655,21 +611,14 @@
         }
 
         function viewProduct(id) {
-            // ROUTER: Arahkan langsung ke Landing Page masing-masing produk
-            if(id === 'PRD-01' || id === 'PRD-02') {
-                window.location.href = "https://klikcrm.vercel.app";
-            } else if (id === 'PRD-03') {
-                window.location.href = "https://klikgereja.vercel.app"; 
-            } else if (id === 'PRD-04') { // <--- Ini tambahan untuk klikCEO
-                window.location.href = "https://klikceo.vercel.app";
-            } else if (id === 'PRD-05') { // <--- TAMBAHAN UNTUK KLIKTOKOKU
-                window.location.href = "https://lp-kliktokoku.vercel.app";
-            } else if (id === 'PRD-06') { 
-    window.location.href = "https://promoklikresto.vercel.app";
-            } else {
-                Swal.fire('Segera Hadir', 'Halaman detail untuk sistem ini sedang dipersiapkan.', 'info');
-            }
+            if(id === 'PRD-01' || id === 'PRD-02') { window.location.href = "https://klikcrm.vercel.app"; } 
+            else if (id === 'PRD-03') { window.location.href = "https://klikgereja.vercel.app"; } 
+            else if (id === 'PRD-04') { window.location.href = "https://klikceo.vercel.app"; } 
+            else if (id === 'PRD-05') { window.location.href = "https://lp-kliktokoku.vercel.app"; } 
+            else if (id === 'PRD-06') { window.location.href = "https://promoklikresto.vercel.app"; } 
+            else { Swal.fire('Segera Hadir', 'Halaman detail untuk sistem ini sedang dipersiapkan.', 'info'); }
         }
+
         // ================= CART & CHECKOUT =================
         function addToCart(id) {
             const p = db.products.find(x => x.id === id);
@@ -712,7 +661,6 @@
 
             const totalAmount = cart.reduce((sum, item) => sum + ((item.product.price - item.product.discount) * item.qty), 0);
             
-            // 1. Tampilkan Pop-Up QRIS & Rekening Bank dengan Tombol Download
             Swal.fire({
                 title: 'Selesaikan Pembayaran',
                 html: `
@@ -720,15 +668,11 @@
                     <div class="bg-navy-50 p-5 rounded-2xl border border-navy-200 mb-4 text-center">
                         <p class="font-bold text-navy-900 mb-3">Scan QRIS di bawah ini:</p>
                         
-                        <!-- Area Gambar dan Tombol Download -->
                         <div class="mb-4">
-                            <!-- PASTIKAN MENGGANTI URL src DI BAWAH INI DENGAN URL GAMBAR QRIS ANDA -->
                             <img src="https://i.ibb.co.com/XfXyKvT1/QRIS-klik-Sistem.png" alt="QRIS" class="w-48 h-48 mx-auto border-2 border-navy-200 rounded-xl shadow-sm mb-3 object-contain bg-white">
-                            
-                            <!-- PASTIKAN MENGGANTI URL href DI BAWAH INI SAMA DENGAN URL GAMBAR QRIS DI ATAS -->
                             <button type="button" onclick="unduhQRIS('https://i.ibb.co.com/XfXyKvT1/QRIS-klik-Sistem.png')" class="inline-flex items-center justify-center gap-1 bg-white border border-navy-300 text-navy-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-navy-100 transition shadow-sm w-full mt-2">
-    <span class="material-symbols-outlined text-[16px]">download</span> Simpan Gambar QRIS
-</button>
+                                <span class="material-symbols-outlined text-[16px]">download</span> Simpan Gambar QRIS
+                            </button>
                         </div>
                         
                         <div class="border-t border-navy-200 pt-4">
@@ -739,43 +683,31 @@
                     </div>
                     <p class="text-xs text-navy-600 font-medium bg-yellow-50 p-2 rounded border border-yellow-200">Setelah transfer, WAJIB klik tombol di bawah untuk konfirmasi.</p>
                 `,
-                showCancelButton: true, 
-                confirmButtonText: '<span class="material-symbols-outlined align-middle text-sm mr-1">whatsapp</span> Konfirmasi via WA', 
-                cancelButtonText: 'Batal',
-                confirmButtonColor: '#25D366',
-                cancelButtonColor: '#64748b'
+                showCancelButton: true, confirmButtonText: '<span class="material-symbols-outlined align-middle text-sm mr-1">whatsapp</span> Konfirmasi via WA', cancelButtonText: 'Batal', confirmButtonColor: '#25D366', cancelButtonColor: '#64748b'
             }).then(async (res) => {
-// ... sisa kode di bawahnya tetap sama ...
                 if(res.isConfirmed) {
                     Swal.fire({ title: 'Memproses Pesanan...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                     
                     const invoiceNum = "INV-"+Math.floor(Math.random()*10000);
-                    const waAdmin = "6281328307335"; // Nomor Admin Anda
+                    const waAdmin = "6281328307335"; 
                     
-                    // 2. PERUBAHAN KRUSIAL: Set Status ke "Pending"
                     const orderData = { 
                         id: "ORD-"+Date.now().toString().slice(-4), 
                         invoice: invoiceNum, 
                         user_id: currentUser.id, 
                         affiliate_code: activeRefCode || "", 
                         total: totalAmount, 
-                        payment_status: "Pending", // <--- Sekarang Pending, bukan Paid
+                        payment_status: "Pending", 
                         status: "Waiting Payment", 
                         created_at: new Date().toISOString().split('T')[0] 
                     };
                     
                     try {
                         await apiCall('saveOrder', { orderData });
-                        db.orders.push(orderData); // Optimistic Update
-                        cart = []; 
-                        updateCartUI();
+                        db.orders.push(orderData);
+                        cart = []; updateCartUI();
                         
-                        // 3. Arahkan ke WA untuk kirim bukti transfer
-                        Swal.fire({
-                            title: 'Pesanan Dibuat!', 
-                            text: 'Sistem akan membuka WhatsApp. Silakan kirim foto bukti transfer Anda ke Admin.', 
-                            icon: 'success'
-                        }).then(() => {
+                        Swal.fire({ title: 'Pesanan Dibuat!', text: 'Sistem akan membuka WhatsApp. Silakan kirim foto bukti transfer Anda ke Admin.', icon: 'success' }).then(() => {
                             switchView('dashboard');
                             const waText = `Halo Admin klikSistem, saya sudah mentransfer uang sebesar *${formatRp(totalAmount)}* untuk tagihan *${invoiceNum}*. Berikut saya lampirkan bukti transfernya.`;
                             window.open(`https://api.whatsapp.com/send?phone=${waAdmin}&text=${waText}`, '_blank');
@@ -825,13 +757,10 @@
                     Swal.fire({icon:'success', title:'Selamat Datang', toast:true, position:'top-end', showConfirmButton:false, timer:2000});
                     switchView('dashboard');
                     
-                    // --- TAMBAHAN CCTV TITIK B ---
-                    // Cek apakah pelanggan ini login karena mau bayar dari Landing Page
+                    // --- TITIK B: Cek Auto-Trigger Pembayaran ---
                     if (typeof checkPendingPurchase === "function") {
                         checkPendingPurchase(); 
                     }
-                    // -----------------------------
-                }
                 } else if (res.success && !res.user) {
                     Swal.fire('Berhasil', res.message, 'success'); setAuthTab('login');
                 } else {
@@ -899,13 +828,8 @@
                 </div>`;
                 renderAdminChart(myOrders);
             } else {
-                // LOGIKA AFILIASI UNTUK MEMBER BIASA
                 const commPercentage = parseInt(db.settings.affiliate_percentage) || 40;
-                
-                // Cari orderan orang lain yang menggunakan kode afiliasi user ini (hanya yang sudah Paid)
                 const myAffiliateOrders = db.orders.filter(o => o.affiliate_code === currentUser.affiliate_code && o.payment_status === 'Paid');
-                
-                // Hitung total komisi Rupiah
                 const totalCommission = myAffiliateOrders.reduce((sum, o) => sum + (o.total * (commPercentage / 100)), 0);
 
                 container.innerHTML = `
@@ -941,7 +865,6 @@
                     </div>
                     
                     <div class="md:col-span-5 space-y-6">
-                        <!-- Kotak Info Link Afiliasi -->
                         <div class="bg-navy-900 rounded-2xl shadow-xl p-6 text-white">
                             <h2 class="text-xl font-bold mb-2">Afiliasi Partner</h2>
                             <p class="text-navy-200 text-sm mb-6">Komisi <b>${commPercentage}%</b> per transaksi sukses.</p>
@@ -949,12 +872,11 @@
                                 <span class="text-2xl font-black">${currentUser.affiliate_code || '-'}</span>
                             </div>
                             <div class="space-y-3">
-                                <button onclick="navigator.clipboard.writeText('https://klikcrm.vercel.app/?ref=${currentUser.affiliate_code}'); Swal.fire('Tersalin!', 'Link Promo klikCRM berhasil disalin.', 'success');" class="w-full bg-primary-600 text-white py-3 rounded-xl font-bold shadow-md hover:bg-primary-700 transition">Salin Link klikCRM</button>
+                                <button onclick="navigator.clipboard.writeText('https://kliksistem.vercel.app/?ref=${currentUser.affiliate_code}'); Swal.fire('Tersalin!', 'Link Afiliasi berhasil disalin.', 'success');" class="w-full bg-primary-600 text-white py-3 rounded-xl font-bold shadow-md hover:bg-primary-700 transition">Salin Link Referal</button>
                                 <p class="text-xs text-navy-300 text-center mt-2 leading-tight">Sebarkan link di atas. Jika pembeli klik, komisi otomatis masuk ke akun Anda.</p>
                             </div>
                         </div>
 
-                        <!-- Kotak Saldo Komisi & Riwayat Referal -->
                         <div class="bg-white rounded-2xl shadow-sm border border-navy-100 p-6">
                             <h3 class="text-lg font-bold text-navy-900 mb-4">Dompet Komisi</h3>
                             <div class="bg-green-50 rounded-xl p-4 border border-green-100 mb-6">
@@ -986,15 +908,10 @@
             }
         }
 
-        // FUNGSI TARIK KOMISI VIA WA
         function requestPayout(amount) {
-            if (amount <= 0) {
-                return Swal.fire('Oops!', 'Saldo komisi Anda masih Rp 0.', 'warning');
-            }
-            
-            const waAdmin = "6281328307335"; // GANTI DENGAN NOMOR WA ANDA
+            if (amount <= 0) return Swal.fire('Oops!', 'Saldo komisi Anda masih Rp 0.', 'warning');
+            const waAdmin = "6281328307335"; 
             const text = `Halo Admin klikSistem, saya ingin mencairkan komisi afiliasi saya.%0A%0A*Nama:* ${currentUser.fullname}%0A*Kode Afiliasi:* ${currentUser.affiliate_code}%0A*Nominal:* ${formatRp(amount)}%0A%0AMohon panduannya untuk proses transfer. Terima kasih.`;
-            
             window.open(`https://api.whatsapp.com/send?phone=${waAdmin}&text=${text}`, '_blank');
         }
 
@@ -1069,14 +986,9 @@
 
         function openProductModal(productId = null) {
             let p = { name: '', category: 'App', price: '', image: '', description: '', status: 'Active' };
-            let title = 'Tambah Sistem Baru';
-            let btnText = 'Simpan Baru';
+            let title = 'Tambah Sistem Baru'; let btnText = 'Simpan Baru';
 
-            if (productId) {
-                p = db.products.find(x => x.id === productId);
-                title = 'Edit Data Sistem';
-                btnText = 'Simpan Perubahan';
-            }
+            if (productId) { p = db.products.find(x => x.id === productId); title = 'Edit Data Sistem'; btnText = 'Simpan Perubahan'; }
 
             Swal.fire({
                 title: title,
@@ -1118,127 +1030,66 @@
                         </div>
                     </div>
                 `,
-                showCancelButton: true, confirmButtonText: btnText, cancelButtonText: 'Batal',
-                confirmButtonColor: '#dc2626', cancelButtonColor: '#1e293b',
+                showCancelButton: true, confirmButtonText: btnText, cancelButtonText: 'Batal', confirmButtonColor: '#dc2626', cancelButtonColor: '#1e293b',
                 customClass: { popup: 'rounded-3xl border border-navy-100', confirmButton: 'rounded-xl font-bold', cancelButton: 'rounded-xl font-bold' },
                 preConfirm: () => {
-                    const name = document.getElementById('swal-p-name').value;
-                    const cat = document.getElementById('swal-p-cat').value;
-                    const price = document.getElementById('swal-p-price').value;
-                    const status = document.getElementById('swal-p-status').value;
-                    const img = document.getElementById('swal-p-img').value || 'https://placehold.co/500x500/1e293b/ffffff?text=Produk';
-                    const desc = document.getElementById('swal-p-desc').value;
+                    const name = document.getElementById('swal-p-name').value; const cat = document.getElementById('swal-p-cat').value; const price = document.getElementById('swal-p-price').value; const status = document.getElementById('swal-p-status').value; const img = document.getElementById('swal-p-img').value || 'https://placehold.co/500x500/1e293b/ffffff?text=Produk'; const desc = document.getElementById('swal-p-desc').value;
                     if(!name || !price) { Swal.showValidationMessage('Nama dan Harga Wajib Diisi!'); return false; }
                     return { name, category: cat, price: parseInt(price), status: status, image: img, description: desc };
                 }
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     if (productId) {
-                        const updatedData = result.value;
-                        const pIndex = db.products.findIndex(x => x.id === productId);
-                        const backupProd = { ...db.products[pIndex] };
-                        
-                        // Optimistic Update
-                        db.products[pIndex] = { ...db.products[pIndex], ...updatedData };
-                        renderAdminProducts(); renderProducts();
-                        
-                        try {
-                            await apiCall('updateProduct', { id: productId, updateObj: updatedData });
-                            Swal.fire({icon: 'success', title: 'Tersimpan', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500});
-                        } catch (err) {
-                            db.products[pIndex] = backupProd; renderAdminProducts(); renderProducts();
-                            Swal.fire('Error', err.message, 'error'); 
-                        }
+                        const updatedData = result.value; const pIndex = db.products.findIndex(x => x.id === productId); const backupProd = { ...db.products[pIndex] };
+                        db.products[pIndex] = { ...db.products[pIndex], ...updatedData }; renderAdminProducts(); renderProducts();
+                        try { await apiCall('updateProduct', { id: productId, updateObj: updatedData }); Swal.fire({icon: 'success', title: 'Tersimpan', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500}); } 
+                        catch (err) { db.products[pIndex] = backupProd; renderAdminProducts(); renderProducts(); Swal.fire('Error', err.message, 'error'); }
                     } else {
                         const newProd = {
-                            id: "PRD-" + Math.floor(Math.random() * 10000).toString().padStart(4, '0'),
-                            name: result.value.name, slug: result.value.name.toLowerCase().replace(/ /g, '-'),
-                            category: result.value.category, price: result.value.price, discount: 0, stock: 999,
-                            sku: "SKU-" + Math.floor(Math.random() * 10000), image: result.value.image,
-                            description: result.value.description, status: result.value.status
+                            id: "PRD-" + Math.floor(Math.random() * 10000).toString().padStart(4, '0'), name: result.value.name, slug: result.value.name.toLowerCase().replace(/ /g, '-'), category: result.value.category, price: result.value.price, discount: 0, stock: 999, sku: "SKU-" + Math.floor(Math.random() * 10000), image: result.value.image, description: result.value.description, status: result.value.status
                         };
-
-                        // Optimistic Update
-                        db.products.push(newProd); 
-                        renderAdminProducts(); renderProducts(); renderCategories();
-                        
-                        try {
-                            await apiCall('saveProduct', { productData: newProd });
-                            Swal.fire({icon: 'success', title: 'Tersimpan', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500});
-                        } catch (err) {
-                            db.products.pop(); renderAdminProducts(); renderProducts(); renderCategories();
-                            Swal.fire('Error', err.message, 'error'); 
-                        }
+                        db.products.push(newProd); renderAdminProducts(); renderProducts(); renderCategories();
+                        try { await apiCall('saveProduct', { productData: newProd }); Swal.fire({icon: 'success', title: 'Tersimpan', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500}); } 
+                        catch (err) { db.products.pop(); renderAdminProducts(); renderProducts(); renderCategories(); Swal.fire('Error', err.message, 'error'); }
                     }
                 }
             });
         }
 
         async function toggleProductStatus(id) {
-            const pIndex = db.products.findIndex(x => x.id === id);
-            if(pIndex === -1) return;
-            const oldStatus = db.products[pIndex].status;
-            const newStatus = oldStatus === 'Active' ? 'Inactive' : 'Active';
-
-            // Optimistic Update
-            db.products[pIndex].status = newStatus; 
-            renderAdminProducts(); renderProducts();
-
-            try {
-                await apiCall('updateProduct', { id: id, updateObj: { status: newStatus } });
-                Swal.fire({icon: 'success', title: 'Status Diubah', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500});
-            } catch (err) {
-                db.products[pIndex].status = oldStatus; renderAdminProducts(); renderProducts();
-                Swal.fire('Error', err.message, 'error'); 
-            }
+            const pIndex = db.products.findIndex(x => x.id === id); if(pIndex === -1) return;
+            const oldStatus = db.products[pIndex].status; const newStatus = oldStatus === 'Active' ? 'Inactive' : 'Active';
+            db.products[pIndex].status = newStatus; renderAdminProducts(); renderProducts();
+            try { await apiCall('updateProduct', { id: id, updateObj: { status: newStatus } }); Swal.fire({icon: 'success', title: 'Status Diubah', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500}); } 
+            catch (err) { db.products[pIndex].status = oldStatus; renderAdminProducts(); renderProducts(); Swal.fire('Error', err.message, 'error'); }
         }
 
         function deleteProductData(id) {
             Swal.fire({
-                title: 'Hapus Produk?',
-                text: "Data yang dihapus dari Database tidak bisa dikembalikan!",
-                icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', cancelButtonColor: '#1e293b', confirmButtonText: 'Ya, Hapus!'
+                title: 'Hapus Produk?', text: "Data yang dihapus dari Database tidak bisa dikembalikan!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', cancelButtonColor: '#1e293b', confirmButtonText: 'Ya, Hapus!'
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    const pIndex = db.products.findIndex(x => x.id === id);
-                    if(pIndex === -1) return;
+                    const pIndex = db.products.findIndex(x => x.id === id); if(pIndex === -1) return;
                     const backupProd = db.products[pIndex];
-                    
-                    // Optimistic Delete
-                    db.products.splice(pIndex, 1);
-                    renderAdminProducts(); renderProducts(); renderCategories();
-                    
-                    try {
-                        await apiCall('deleteProduct', { id: id });
-                        Swal.fire('Terhapus!', 'Produk telah dihapus.', 'success');
-                    } catch (err) {
-                        db.products.splice(pIndex, 0, backupProd); renderAdminProducts(); renderProducts(); renderCategories();
-                        Swal.fire('Error', err.message, 'error'); 
-                    }
+                    db.products.splice(pIndex, 1); renderAdminProducts(); renderProducts(); renderCategories();
+                    try { await apiCall('deleteProduct', { id: id }); Swal.fire('Terhapus!', 'Produk telah dihapus.', 'success'); } 
+                    catch (err) { db.products.splice(pIndex, 0, backupProd); renderAdminProducts(); renderProducts(); renderCategories(); Swal.fire('Error', err.message, 'error'); }
                 }
             });
         }
 
         function renderAdminChart(orders) {
-            const ctx = document.getElementById('adminChart');
-            if(!ctx) return;
+            const ctx = document.getElementById('adminChart'); if(!ctx) return;
             if(revenueChartInstance) revenueChartInstance.destroy();
-            const sales = {};
-            orders.forEach(o => { if(o.payment_status === 'Paid') sales[o.created_at] = (sales[o.created_at] || 0) + o.total; });
-            const labels = Object.keys(sales).sort() || ['N/A'];
-            const data = labels.map(d => sales[d]) || [0];
-
-            revenueChartInstance = new Chart(ctx, {
-                type: 'bar', data: { labels: labels, datasets: [{ label: 'Pendapatan (Rp)', data: data, backgroundColor: '#dc2626', borderRadius: 6 }] },
-                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } }, x: { grid: { display: false }, ticks: { color: '#64748b' } } } }
-            });
+            const sales = {}; orders.forEach(o => { if(o.payment_status === 'Paid') sales[o.created_at] = (sales[o.created_at] || 0) + o.total; });
+            const labels = Object.keys(sales).sort() || ['N/A']; const data = labels.map(d => sales[d]) || [0];
+            revenueChartInstance = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Pendapatan (Rp)', data: data, backgroundColor: '#dc2626', borderRadius: 6 }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } }, x: { grid: { display: false }, ticks: { color: '#64748b' } } } } });
         }
 
         function exportPDF() {
             const doc = new window.jspdf.jsPDF(); doc.text(`Laporan Penjualan klikSistem`, 14, 20);
             doc.autoTable({ html: '#table-export', startY: 35, theme: 'grid', headStyles: { fillColor: [15, 23, 42] } });
-            doc.save(`Laporan_klikSistem_${Date.now()}.pdf`);
-            Swal.fire({icon: 'success', title: 'Berhasil', text: 'PDF diunduh.'});
+            doc.save(`Laporan_klikSistem_${Date.now()}.pdf`); Swal.fire({icon: 'success', title: 'Berhasil', text: 'PDF diunduh.'});
         }
 
         function handleDummyAPI(action, payload) {
@@ -1256,85 +1107,54 @@
 
         function DUMMY_DB() { return { products: [{ id: "PRD-01", name: "klikCRM Pro", category: "App", price: 1500000, discount: 0, image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=500", description: "Mesin Akselerasi Konversi Sales.", status: "Active" }], users: [{ id: "USR-1", fullname: "Admin", email: "admin@kliksistem.com", password_hash: "sysadmin", role: "Admin" }], orders: [], settings: { affiliate_percentage: 20 } }; }
 
-
-
-// --- TEMPELKAN KODE DI SINI (ADA JARAK DARI FUNGSI ATASNYA) ---
-    async function unduhQRIS(url) {
-        try {
-            Swal.fire({title: 'Menyiapkan Gambar...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
-            
-            const response = await fetch(url);
-            const blob = await response.blob();
-            const urlCreator = window.URL || window.webkitURL;
-            const imageUrl = urlCreator.createObjectURL(blob);
-            
-            const tag = document.createElement('a');
-            tag.href = imageUrl;
-            tag.download = 'QRIS-klikSistem.jpg';
-            document.body.appendChild(tag);
-            tag.click();
-            document.body.removeChild(tag);
-            
-            Swal.close();
-        } catch (err) {
-            Swal.fire({
-                icon: 'info',
-                title: 'Info Pengunduhan',
-                text: 'Karena pengaturan keamanan browser, silakan tekan tahan gambar QRIS di atas lalu pilih "Simpan Gambar" (Save Image).',
-                confirmButtonText: 'Tutup'
-            });
+        // ================= FUNGSI TAMBAHAN =================
+        async function unduhQRIS(url) {
+            try {
+                Swal.fire({title: 'Menyiapkan Gambar...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+                const response = await fetch(url);
+                const blob = await response.blob();
+                const urlCreator = window.URL || window.webkitURL;
+                const imageUrl = urlCreator.createObjectURL(blob);
+                const tag = document.createElement('a');
+                tag.href = imageUrl;
+                tag.download = 'QRIS-klikSistem.jpg';
+                document.body.appendChild(tag);
+                tag.click();
+                document.body.removeChild(tag);
+                Swal.close();
+            } catch (err) {
+                Swal.fire({ icon: 'info', title: 'Info Pengunduhan', text: 'Karena pengaturan keamanan browser, silakan tekan tahan gambar QRIS di atas lalu pilih "Simpan Gambar" (Save Image).', confirmButtonText: 'Tutup' });
+            }
         }
-    } //
 
-// --- LOGIKA AUTO-TRIGGER CHECKOUT ---
         function checkPendingPurchase() {
-            // 1. Cek apakah ada parameter ?buy= di URL
             const urlParams = new URLSearchParams(window.location.search);
             const buyProductId = urlParams.get('buy');
-            
-            // 2. Cek apakah ada niat beli yang tertunda di LocalStorage (sebelum login)
             const pendingBuyId = localStorage.getItem('pending_kliksistem_buy');
             
-            // Tentukan ID mana yang akan dieksekusi (URL prioritas utama)
             const targetProductId = buyProductId || pendingBuyId;
 
             if (targetProductId) {
-                // Jika user SUDAH LOGIN
                 if (currentUser) {
-                    // Cari data produk di database
-                    const product = dummy_db().products.find(p => p.id === targetProductId);
+                    const product = db.products.find(p => p.id === targetProductId);
                     
                     if (product) {
-                        // Masukkan produk ke keranjang (bersihkan yang lama agar fokus)
                         cart = [{ product: product, qty: 1 }];
-                        updateCart(); // Update tampilan keranjang (sesuaikan dengan nama fungsi Anda)
+                        updateCartUI(); 
                         
-                        // Buka Pop-Up Pembayaran secara otomatis dengan jeda 0.5 detik agar smooth
                         setTimeout(() => {
                             processCheckout();
-                            
-                            // Bersihkan jejak agar tidak muncul terus saat halaman di-refresh
                             localStorage.removeItem('pending_kliksistem_buy');
                             window.history.replaceState({}, document.title, window.location.pathname);
                         }, 500); 
                     }
                 } else {
-                    // Jika user BELUM LOGIN, simpan niat belinya lalu paksa buka modal login
                     localStorage.setItem('pending_kliksistem_buy', targetProductId);
-                    openAuthModal(); // Membuka pop-up login (sesuaikan dengan nama fungsi Anda)
-                    
-                    // Bersihkan URL agar bersih
+                    openAuthModal(); 
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
             }
         }
-
-  // CCTV Titik A: Berjalan otomatis saat halaman web selesai dimuat
-    window.addEventListener('DOMContentLoaded', () => {
-        if (typeof checkPendingPurchase === "function") {
-            checkPendingPurchase();
-        }
-    });      
     </script>
 </body>
 </html>
